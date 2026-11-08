@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
 import { groupLabel } from "@/lib/groups";
 import { localIso } from "@/lib/utils";
-import { takrirRange, takrirDaysInRange, takrirStats, type TakrirRange } from "@/lib/takrir";
 
 export const Route = createFileRoute("/takrir")({
   head: () => ({ meta: [
@@ -16,12 +15,14 @@ export const Route = createFileRoute("/takrir")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
+  validateSearch: (s: Record<string, unknown>): { date?: string } => (typeof s["date"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s["date"]) ? { date: s["date"] } : {}),
   component: Takrir,
 });
 
 function Takrir() {
   const { students, takrirler, addTakrirDay, markTakrir, removeTakrirDay, group } = useStore();
-  const [date, setDate] = useState(localIso());
+  const search = Route.useSearch();
+  const [date, setDate] = useState(search.date ?? localIso());
   const [filter, setFilter] = useState<"all" | "verdi" | "vermedi">("all");
   const session = takrirler.find((d) => d.date === date);
   const verdiCount = students.filter((s) => session?.results[s.id] === true).length;
@@ -68,52 +69,5 @@ function Takrir() {
         })}
         </div>
       </div>}
-    <TakrirHistory onOpen={(d) => { setDate(d); setFilter("all"); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
   </>;
-}
-
-const RANGES: { id: TakrirRange; label: string }[] = [
-  { id: "dun", label: "Dün" },
-  { id: "bu-hafta", label: "Bu Hafta" },
-  { id: "gecen-hafta", label: "Geçen Hafta" },
-];
-
-function fmt(dateIso: string) {
-  return new Date(`${dateIso}T12:00:00`).toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
-}
-
-function TakrirHistory({ onOpen }: { onOpen: (date: string) => void }) {
-  const { students, takrirler } = useStore();
-  const [range, setRange] = useState<TakrirRange>("dun");
-  const { from, to } = takrirRange(range, new Date());
-  const days = takrirDaysInRange(takrirler, from, to);
-  const ids = new Set(students.map((s) => s.id));
-  const summary = students.map((s) => ({ s, ...takrirStats(days, s.id) })).filter((r) => r.verdi + r.vermedi > 0);
-
-  return <section className="mt-8 border-t border-border pt-5">
-    <h3 className="font-serif text-xl font-bold">Geçmiş Takrirler</h3>
-    <div className="mt-3 grid grid-cols-3 gap-2">
-      {RANGES.map((r) => <Button key={r.id} variant={range === r.id ? "default" : "outline"} size="sm" onClick={() => setRange(r.id)}>{r.label}</Button>)}
-    </div>
-    <p className="mt-2 text-xs text-muted-foreground">{from === to ? fmt(from) : `${fmt(from)} – ${fmt(to)}`}</p>
-    {!days.length ? <p className="py-8 text-center text-sm text-muted-foreground">Bu aralıkta takrir yok.</p> : <>
-      <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card">
-        {days.map((d) => {
-          const listed = Object.keys(d.results).filter((id) => ids.has(id));
-          const verdi = listed.filter((id) => d.results[id]).length;
-          return <button key={d.id} type="button" onClick={() => onOpen(d.date)} className="flex w-full items-center justify-between gap-3 border-t border-border px-3 py-3 text-left text-sm first:border-t-0 hover:bg-accent">
-            <span className="font-medium capitalize">{fmt(d.date)}</span>
-            <span className="shrink-0"><span className="font-semibold text-primary">{verdi} verdi</span> · <span className="text-muted-foreground">{listed.length - verdi} vermedi</span></span>
-          </button>;
-        })}
-      </div>
-      {days.length > 1 && summary.length > 0 && <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
-        <div className="bg-muted px-3 py-2 text-xs font-medium text-muted-foreground">Talebe özeti ({days.length} takrir günü)</div>
-        {summary.map(({ s, verdi, vermedi }) => <div key={s.id} className="flex items-center justify-between gap-3 border-t border-border px-3 py-2.5 text-sm">
-          <span className="min-w-0 break-words">{s.name}</span>
-          <span className="shrink-0"><span className="font-semibold text-primary">{verdi} verdi</span> · <span className="text-muted-foreground">{vermedi} vermedi</span></span>
-        </div>)}
-      </div>}
-    </>}
-  </section>;
 }

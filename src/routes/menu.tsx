@@ -8,8 +8,8 @@ import { Sheet } from "@/components/app/Sheet";
 import { StudentForm, emptyStudent } from "@/components/app/StudentForm";
 import { useStore, type State } from "@/lib/store";
 import { exportFiles, importFiles } from "@/lib/attachments";
-import { trialPrefix, withTrialStudents } from "@/lib/trial-students";
 import { groupLabel } from "@/lib/groups";
+import { TakrirHistory } from "@/components/app/TakrirHistory";
 
 // Heavy sheets load only when opened, so the Menu page opens instantly.
 const EmailReports = lazy(() => import("@/components/app/EmailReports").then((m) => ({ default: m.EmailReports })));
@@ -89,15 +89,17 @@ function Menu() {
         <Sheet open={addOpen} onClose={() => setAddOpen(false)} title={`Yeni Talebe · ${groupLabel(group)}`}>
           <StudentForm initial={emptyStudent} onSubmit={(s) => { addStudent(s); setAddOpen(false); setMsg(`${s.name} eklendi.`); }} />
         </Sheet>
-        <Button variant="outline" onClick={() => {
-          const next = withTrialStudents(students, group);
-          importAll({ students: next, attendance, tutanaklar });
-          setMsg(`${next.length - students.length} deneme talebesi eklendi; mevcut kayıtlar korundu.`);
-        }} disabled={students.filter((student) => student.id.startsWith(trialPrefix(group))).length === 55} className="h-auto w-full justify-start whitespace-normal py-4">
-          <UserPlus className="text-primary" /> 55 deneme talebesi ekle
-        </Button>
+        {students.some((st) => st.id.startsWith("trial-")) && <Button variant="outline" onClick={() => {
+          if (!confirm("Tüm deneme talebeleri ve kayıtları silinsin mi?")) return;
+          const keep = students.filter((st) => !st.id.startsWith("trial-"));
+          importAll({ students: keep, attendance: attendance.filter((a) => !a.studentId.startsWith("trial-")), tutanaklar });
+          setMsg(`${students.length - keep.length} deneme talebesi silindi.`);
+        }} className="h-auto w-full justify-start whitespace-normal py-4 text-destructive">
+          <UserPlus /> Deneme talebelerini sil
+        </Button>}
         <Link to="/ai-tutanak" className={btn}><Sparkles className="h-5 w-5 text-primary" /> AI ile Tutanak Hazırla</Link>
         <Button variant="outline" asChild className="h-auto w-full justify-start whitespace-normal py-4"><Link to="/takrir"><BookOpen className="text-primary" /> Takrir</Link></Button>
+        <TakrirHistory />
         <button onClick={() => setReportOpen(true)} className={btn}><FileDown className="h-5 w-5 text-primary" /> Yoklama Raporu İndir (PDF / Excel)</button>
         <button onClick={() => setMailOpen(true)} className={btn}><Mail className="h-5 w-5 text-primary" /> Otomatik Rapor E-postası</button>
         <Suspense fallback={null}>

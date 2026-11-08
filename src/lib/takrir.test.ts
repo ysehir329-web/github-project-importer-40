@@ -31,3 +31,15 @@ describe("takrir", () => {
     expect(d).toHaveLength(1);
   });
 });
+
+import { takrirRange, takrirDaysInRange } from "./takrir";
+describe("takrir geçmiş", () => {
+  const sun = new Date(2026, 10, 8); // Pazar 8 Kasım 2026
+  it("dün = bir önceki gün", () => expect(takrirRange("dun", sun)).toEqual({ from: "2026-11-07", to: "2026-11-07" }));
+  it("bu hafta Pazartesi–Pazar", () => expect(takrirRange("bu-hafta", sun)).toEqual({ from: "2026-11-02", to: "2026-11-08" }));
+  it("geçen hafta", () => expect(takrirRange("gecen-hafta", sun)).toEqual({ from: "2026-10-26", to: "2026-11-01" }));
+  it("aralıktaki günler yeniden eskiye", () => {
+    const days = ["2026-10-30", "2026-11-03", "2026-10-28"].map((date) => ({ id: date, date, results: {} }));
+    expect(takrirDaysInRange(days, "2026-10-26", "2026-11-01").map((d) => d.date)).toEqual(["2026-10-30", "2026-10-28"]);
+  });
+});

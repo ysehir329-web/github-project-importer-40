@@ -15,7 +15,7 @@ export const Route = createFileRoute("/takrir")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
-  validateSearch: (s: Record<string, unknown>): { date?: string } => (typeof s.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.date) ? { date: s.date } : {}),
+  validateSearch: (s: Record<string, unknown>): { date?: string } => (typeof s["date"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s["date"]) ? { date: s["date"] } : {}),
   component: Takrir,
 });
 

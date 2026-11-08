@@ -44,3 +44,21 @@ export function takrirRange(range: TakrirRange, today: Date): { from: string; to
 export function takrirDaysInRange(days: TakrirDay[], from: string, to: string): TakrirDay[] {
   return days.filter((d) => d.date >= from && d.date <= to).sort((a, b) => b.date.localeCompare(a.date));
 }
+
+/** Monday (ISO) of the week containing the given ISO date. */
+export function weekStart(dateIso: string): string {
+  const d = new Date(`${dateIso}T12:00:00`);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return iso(d);
+}
+
+export function weekEnd(mondayIso: string): string {
+  const d = new Date(`${mondayIso}T12:00:00`);
+  d.setDate(d.getDate() + 6);
+  return iso(d);
+}
+
+/** Distinct weeks (Monday ISO) that have takrir days, newest first. */
+export function takrirWeeks(days: TakrirDay[]): string[] {
+  return [...new Set(days.map((d) => weekStart(d.date)))].sort((a, b) => b.localeCompare(a));
+}

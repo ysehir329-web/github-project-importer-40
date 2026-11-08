@@ -43,3 +43,13 @@ describe("takrir geçmiş", () => {
     expect(takrirDaysInRange(days, "2026-10-26", "2026-11-01").map((d) => d.date)).toEqual(["2026-10-30", "2026-10-28"]);
   });
 });
+
+import { weekStart, weekEnd, takrirWeeks } from "./takrir";
+describe("takrir haftası", () => {
+  it("Pazar gününün haftası Pazartesi başlar", () => expect(weekStart("2026-11-08")).toBe("2026-11-02"));
+  it("hafta Pazar biter", () => expect(weekEnd("2026-11-02")).toBe("2026-11-08"));
+  it("takrir olan haftalar yeniden eskiye, tekrar etmeden", () => {
+    const days = ["2026-10-27", "2026-11-03", "2026-10-29"].map((date) => ({ id: date, date, results: {} }));
+    expect(takrirWeeks(days)).toEqual(["2026-11-02", "2026-10-26"]);
+  });
+});

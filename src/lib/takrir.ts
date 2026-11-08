@@ -25,3 +25,22 @@ export function takrirStats(days: TakrirDay[], studentId: string): { verdi: numb
   }
   return { verdi, vermedi };
 }
+
+export type TakrirRange = "dun" | "bu-hafta" | "gecen-hafta";
+
+const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/** Inclusive [from, to] ISO dates; weeks run Monday–Sunday. */
+export function takrirRange(range: TakrirRange, today: Date): { from: string; to: string } {
+  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  if (range === "dun") { d.setDate(d.getDate() - 1); return { from: iso(d), to: iso(d) }; }
+  const monday = new Date(d); monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  if (range === "gecen-hafta") monday.setDate(monday.getDate() - 7);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  return { from: iso(monday), to: iso(sunday) };
+}
+
+/** Takrir days inside the range, newest first. */
+export function takrirDaysInRange(days: TakrirDay[], from: string, to: string): TakrirDay[] {
+  return days.filter((d) => d.date >= from && d.date <= to).sort((a, b) => b.date.localeCompare(a.date));
+}

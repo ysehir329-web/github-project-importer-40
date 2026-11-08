@@ -79,8 +79,7 @@ const RANGES: { id: TakrirRange; label: string }[] = [
 ];
 
 function fmt(dateIso: string) {
-  const [y, m, d] = dateIso.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
+  return new Date(`${dateIso}T12:00:00`).toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
 }
 
 function TakrirHistory({ onOpen }: { onOpen: (date: string) => void }) {

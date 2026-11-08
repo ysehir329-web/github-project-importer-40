@@ -36,6 +36,13 @@
       "when": 1793947161055,
       "tag": "0004_report_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794143369004,
+      "tag": "0005_report_subscriptions",
+      "breakpoints": true
     }
   ]
 }

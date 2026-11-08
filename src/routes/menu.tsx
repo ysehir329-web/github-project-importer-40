@@ -10,6 +10,7 @@ import { useStore, type State } from "@/lib/store";
 import { exportFiles, importFiles } from "@/lib/attachments";
 import { trialPrefix, withTrialStudents } from "@/lib/trial-students";
 import { groupLabel } from "@/lib/groups";
+import { TakrirHistory } from "@/components/app/TakrirHistory";
 
 // Heavy sheets load only when opened, so the Menu page opens instantly.
 const EmailReports = lazy(() => import("@/components/app/EmailReports").then((m) => ({ default: m.EmailReports })));
@@ -98,6 +99,7 @@ function Menu() {
         </Button>
         <Link to="/ai-tutanak" className={btn}><Sparkles className="h-5 w-5 text-primary" /> AI ile Tutanak Hazırla</Link>
         <Button variant="outline" asChild className="h-auto w-full justify-start whitespace-normal py-4"><Link to="/takrir"><BookOpen className="text-primary" /> Takrir</Link></Button>
+        <TakrirHistory />
         <button onClick={() => setReportOpen(true)} className={btn}><FileDown className="h-5 w-5 text-primary" /> Yoklama Raporu İndir (PDF / Excel)</button>
         <button onClick={() => setMailOpen(true)} className={btn}><Mail className="h-5 w-5 text-primary" /> Otomatik Rapor E-postası</button>
         <Suspense fallback={null}>
